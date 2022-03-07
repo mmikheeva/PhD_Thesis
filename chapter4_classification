@@ -1,0 +1,582 @@
+
+############################################ 
+##################### LOAD AND CLASSIFY DATA
+############################################ 
+
+setwd("~/cortado/")
+library(GenomicRanges)
+library(rtracklayer)
+library(R.utils)
+
+############################################ COrTADo start
+
+input_disrectory <- "~/cortado/dpnII_raw/tads/processing/"
+
+input_file <- "BG3_dpnII_raw_startCOrTADo_table_combined_all_rds"
+cortado_start_all <- readRDS(paste0(input_disrectory, input_file))
+input_file <- "BG3_dpnII_raw_startCOrTADo_table_combined_weak_rds"
+cortado_start_weak <- readRDS(paste0(input_disrectory, input_file))
+input_file <- "BG3_dpnII_raw_startCOrTADo_table_combined_strong_rds"
+cortado_start_strong  <- readRDS(paste0(input_disrectory, input_file))
+
+cortado_start_all <- GRanges(
+        seqnames = paste0("chr", unlist(strsplit(as.character(cortado_start_all[,1]), "_"))[c(T,F)]), 
+        ranges = IRanges(
+                start = as.numeric(unlist(strsplit(as.character(cortado_start_all[,1]), "_"))[c(F,T)]), 
+                end = as.numeric(unlist(strsplit(as.character(cortado_start_all[,1]), "_"))[c(F,T)])),
+        strand = "*",
+        strength = cortado_start_all[,4])
+cortado_start_all <- cortado_start_all[order(cortado_start_all)]
+
+cortado_start_weak <- GRanges(
+        seqnames = paste0("chr", unlist(strsplit(as.character(cortado_start_weak[,1]), "_"))[c(T,F)]), 
+        ranges = IRanges(
+                start = as.numeric(unlist(strsplit(as.character(cortado_start_weak[,1]), "_"))[c(F,T)]), 
+                end = as.numeric(unlist(strsplit(as.character(cortado_start_weak[,1]), "_"))[c(F,T)])),
+        strand = "*",
+        strength = cortado_start_weak[,4])
+cortado_start_weak <- cortado_start_weak[order(cortado_start_weak)]
+
+cortado_start_strong <- GRanges(
+        seqnames = paste0("chr", unlist(strsplit(as.character(cortado_start_strong[,1]), "_"))[c(T,F)]), 
+        ranges = IRanges(
+                start = as.numeric(unlist(strsplit(as.character(cortado_start_strong[,1]), "_"))[c(F,T)]), 
+                end = as.numeric(unlist(strsplit(as.character(cortado_start_strong[,1]), "_"))[c(F,T)])),
+        strand = "*",
+        strength = cortado_start_strong[,4])
+cortado_start_strong <- cortado_start_strong[order(cortado_start_strong)]
+
+############################################ COrTADo end
+
+input_disrectory <- "~/cortado/dpnII_raw/tads/processing/"
+
+input_file <- "BG3_dpnII_raw_endCOrTADo_table_combined_all_rds"
+cortado_end_all <- readRDS(paste0(input_disrectory, input_file))
+input_file <- "BG3_dpnII_raw_endCOrTADo_table_combined_weak_rds"
+cortado_end_weak <- readRDS(paste0(input_disrectory, input_file))
+input_file <- "BG3_dpnII_raw_endCOrTADo_table_combined_strong_rds"
+cortado_end_strong  <- readRDS(paste0(input_disrectory, input_file))
+
+cortado_end_all <- GRanges(
+        seqnames = paste0("chr", unlist(strsplit(as.character(cortado_end_all[,1]), "_"))[c(T,F)]), 
+        ranges = IRanges(
+                start = as.numeric(unlist(strsplit(as.character(cortado_end_all[,1]), "_"))[c(F,T)]), 
+                end = as.numeric(unlist(strsplit(as.character(cortado_end_all[,1]), "_"))[c(F,T)])),
+        strand = "*",
+        strength = cortado_end_all[,4])
+cortado_end_all <- cortado_end_all[order(cortado_end_all)]
+
+cortado_end_weak <- GRanges(
+        seqnames = paste0("chr", unlist(strsplit(as.character(cortado_end_weak[,1]), "_"))[c(T,F)]), 
+        ranges = IRanges(
+                start = as.numeric(unlist(strsplit(as.character(cortado_end_weak[,1]), "_"))[c(F,T)]), 
+                end = as.numeric(unlist(strsplit(as.character(cortado_end_weak[,1]), "_"))[c(F,T)])),
+        strand = "*",
+        strength = cortado_end_weak[,4])
+cortado_end_weak <- cortado_end_weak[order(cortado_end_weak)]
+
+cortado_end_strong <- GRanges(
+        seqnames = paste0("chr", unlist(strsplit(as.character(cortado_end_strong[,1]), "_"))[c(T,F)]), 
+        ranges = IRanges(
+                start = as.numeric(unlist(strsplit(as.character(cortado_end_strong[,1]), "_"))[c(F,T)]), 
+                end = as.numeric(unlist(strsplit(as.character(cortado_end_strong[,1]), "_"))[c(F,T)])),
+        strand = "*",
+        strength = cortado_end_strong[,4])
+cortado_end_strong <- cortado_end_strong[order(cortado_end_strong)]
+
+############################################ HiCExplorer
+
+input_disrectory <- "~/hicexplorer/tads/"
+
+input_file <- "BG3_WT_merged_dpnII_domains.bed"
+hicexplorer_weak <- import(paste0(input_disrectory, input_file))
+input_file <- "BG3_WT_merged_dpnII_strong_domains.bed"
+hicexplorer_strong <- import(paste0(input_disrectory, input_file))
+
+hicexplorer_weak_score <- hicexplorer_weak$score
+hicexplorer_weak <- granges(hicexplorer_weak)
+hicexplorer_weak$score <- hicexplorer_weak_score
+start(hicexplorer_weak) <- start(hicexplorer_weak)-1
+end(hicexplorer_weak) <- start(hicexplorer_weak)
+seqlevels(hicexplorer_weak) <- paste0("chr", seqlevels(hicexplorer_weak))
+hicexplorer_weak <- hicexplorer_weak[order(hicexplorer_weak)]
+
+hicexplorer_strong_score <- hicexplorer_strong$score
+hicexplorer_strong <- granges(hicexplorer_strong)
+hicexplorer_strong$score <- hicexplorer_strong_score
+start(hicexplorer_strong) <- start(hicexplorer_strong)-1
+end(hicexplorer_strong) <- start(hicexplorer_strong)
+seqlevels(hicexplorer_strong) <- paste0("chr", seqlevels(hicexplorer_strong))
+hicexplorer_strong <- hicexplorer_strong[order(hicexplorer_strong)]
+
+
+############################################ Common
+
+cortado_start_weak$is_common <- 0
+cortado_end_weak$is_common <- 0
+hicexplorer_weak$is_common <- 0
+cortado_start_weak[queryHits(findOverlaps(cortado_start_weak, hicexplorer_weak, type = "any", maxgap = 5000))]$is_common <- 1 
+hicexplorer_weak[subjectHits(findOverlaps(cortado_start_weak, hicexplorer_weak, type = "any", maxgap = 5000))]$is_common <- 1 
+cortado_end_weak[queryHits(findOverlaps(cortado_end_weak, hicexplorer_weak, type = "any", maxgap = 5000))]$is_common <- 1 
+hicexplorer_weak[subjectHits(findOverlaps(cortado_end_weak, hicexplorer_weak, type = "any", maxgap = 5000))]$is_common <- 1 
+
+cortado_start_strong$is_common <- 0
+cortado_end_strong$is_common <- 0
+hicexplorer_strong$is_common <- 0
+cortado_start_strong[queryHits(findOverlaps(cortado_start_strong, hicexplorer_strong, type = "any", maxgap = 5000))]$is_common <- 1 
+hicexplorer_strong[subjectHits(findOverlaps(cortado_start_strong, hicexplorer_strong, type = "any", maxgap = 5000))]$is_common <- 1 
+cortado_end_strong[queryHits(findOverlaps(cortado_end_strong, hicexplorer_strong, type = "any", maxgap = 5000))]$is_common <- 1 
+hicexplorer_strong[subjectHits(findOverlaps(cortado_end_strong, hicexplorer_strong, type = "any", maxgap = 5000))]$is_common <- 1 
+
+############################################ Imbalanced
+
+cortado_start_weak$insulation <- "1sided"
+cortado_end_weak$insulation <- "1sided"
+cortado_start_weak[queryHits(findOverlaps(cortado_start_weak, cortado_end_weak, type = "any", maxgap = 5000))]$insulation <- "2sided"
+cortado_start_weak[queryHits(findOverlaps(cortado_start_weak, cortado_end_strong, type = "any", maxgap = 5000))]$insulation <- "imbalance"
+cortado_end_weak[queryHits(findOverlaps(cortado_end_weak, cortado_start_weak, type = "any", maxgap = 5000))]$insulation <- "2sided"
+cortado_end_weak[queryHits(findOverlaps(cortado_end_weak, cortado_start_strong, type = "any", maxgap = 5000))]$insulation <- "imbalance"
+
+cortado_start_strong$insulation <- "1sided"
+cortado_end_strong$insulation <- "1sided"
+cortado_start_strong[queryHits(findOverlaps(cortado_start_strong, cortado_end_weak, type = "any", maxgap = 5000))]$insulation <-  "imbalance"
+cortado_start_strong[queryHits(findOverlaps(cortado_start_strong, cortado_end_strong, type = "any", maxgap = 5000))]$insulation <-  "2sided"
+cortado_end_strong[queryHits(findOverlaps(cortado_end_strong, cortado_start_weak, type = "any", maxgap = 5000))]$insulation <-  "imbalance"
+cortado_end_strong[queryHits(findOverlaps(cortado_end_strong, cortado_start_strong, type = "any", maxgap = 5000))]$insulation <-  "2sided"
+
+
+############################################ 
+########################## ACTIVE & INACTIVE
+############################################ 
+
+############################################ Functions
+
+loadObjectAsGR <- function(directory = input_directory, object_name){
+        objectGR <- import(paste0(input_directory, object_name))
+        if (!any(grepl(seqlevels(objectGR), pattern = "chr", ignore.case = TRUE))){seqlevels(objectGR) <- paste0("chr", seqlevels(objectGR))}
+        objectGR <- objectGR[order(objectGR)]
+        objectGR <- unlist(liftOver(objectGR, chain))
+        return(objectGR)
+}
+
+# Author of peaksLoading() function is @DrPartrickMartin
+peaksLoading<-function(x){
+    # Laoding files based on files extension
+    if(grepl(x=x,pattern=".bed")& !grepl(x=x,pattern=".gff")){
+          x<-read.table(x, stringsAsFactors=F)
+        if(length(grep(x=x[,1], pattern="chr"))==0){
+            x[,1]<-paste0("chr",x[,1])
+            x<-GRanges(seqnames=as.character(x[,1]),range=IRanges(x[,2],x[,3]))
+        }else{
+            x<-GRanges(seqnames=as.character(x[,1]),range=IRanges(x[,2],x[,3]))
+        }
+    }else if(grepl(x=x, pattern=".Rda")){
+        x<-get(load(x))
+    }else if(grepl(x=x, pattern=".gff3")){
+          x<-read.table(x, skip=30,stringsAsFactors=F)
+          if(length(grep(x=x[,1], pattern="chr"))==0){
+              x[,1]<-paste0("chr",x[,1])
+              x<-GRanges(seqnames=as.character(x[,1]),range=IRanges(x[,4],x[,5]))
+          }else{
+              x<-GRanges(seqnames=as.character(x[,1]),range=IRanges(x[,4],x[,5]))
+          }
+    } else if(grepl(x=x, pattern=".gff")){
+        x<-read.table(x, skip=30,stringsAsFactors=F)
+        if(length(grep(x=x[,1], pattern="chr"))==0){
+            x[,1]<-paste0("chr",x[,1])
+            x<-GRanges(seqnames=as.character(x[,1]),range=IRanges(x[,4],x[,5]))
+        }else{
+            x<-GRanges(seqnames=as.character(x[,1]),range=IRanges(x[,4],x[,5]))
+        }
+    } else{
+        x<-read.table(x, header=T,stringsAsFactors=F)
+        if(length(grep(x=x[,1], pattern="chr"))==0){
+            x[,1]<-paste0("chr",x[,1])
+            x<-GRanges(seqnames=as.character(x[,1]),range=IRanges(x[,2],x[,3]))
+        }else{
+             x<-GRanges(seqnames=as.character(x[,1]),range=IRanges(x[,2],x[,3]))
+        }
+    }
+    return(x)
+}
+
+############################################ Load peaks
+
+input_directory <- "~/peaks/"
+chain <- import.chain(paste0(input_directory, "dm3ToDm6.over.chain"))
+
+object_name <- "GSE20780_repset.4162470.smoothedM.clusters.gff3"
+object_h3k27me3 <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE20803_repset.4162467.smoothedM.clusters.gff3"
+object_pc <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE20817_repset.8061139.smoothedM.clusters.gff3"
+object_dring <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE32770_repset.4620570.smoothedM.clusters.gff3"
+object_h4 <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE20832_repset.4621045.smoothedM.clusters.gff3"
+object_pol2 <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE20811_repset.4620429.smoothedM.clusters.gff3"
+object_beaf32_r1 <- loadObjectAsGR(object_name = object_name)
+object_name <- "GSE32775_repset.9703859.smoothedM.clusters.gff3"
+object_beaf32_r2 <- loadObjectAsGR(object_name = object_name)
+object_beaf32 <- reduce(c(object_beaf32_r1, object_beaf32_r2))
+
+object_name <- "GSE20761_repset.4620431.smoothedM.clusters.gff3"
+object_chro <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE20839_repset.5014168.smoothedM.clusters.gff3"
+object_h3k4me3 <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE20767_repset.4621686.smoothedM.clusters.gff3"
+object_ctcf_r1 <- loadObjectAsGR(object_name = object_name)
+object_name <- "GSE32783_repset.9274432.smoothedM.clusters.gff3"
+object_ctcf_r2 <- loadObjectAsGR(object_name = object_name)
+object_ctcf <- reduce(c(object_ctcf_r1, object_ctcf_r2))
+
+object_name <- "GSE32769_repset.9700023.smoothedM.clusters.gff3"
+object_h3 <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE23466_repset.9273879.smoothedM.clusters.gff3"
+object_trl <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE20778_repset.4162469.smoothedM.clusters.gff3"
+object_h3k27ac <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE20791_repset.4620569.smoothedM.clusters.gff3"
+object_h3k9me2 <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE20793_repset.4620432.smoothedM.clusters.gff3"
+object_h3k9me3 <- loadObjectAsGR(object_name = object_name)
+
+object_name <- "GSE32778_repset.9274438.smoothedM.clusters.gff3"
+object_cp190_r1 <- loadObjectAsGR(object_name = object_name)
+object_name <- "GSE20814_repset.4623893.smoothedM.clusters.gff3"
+object_cp190_r2<- loadObjectAsGR(object_name = object_name)
+object_cp190 <- reduce(c(object_cp190_r1, object_cp190_r2))
+
+object_name <- "GSE23468_repset.5014166.smoothedM.clusters.gff3"
+object_h3k4me1 <-  loadObjectAsGR(object_name = object_name)
+
+object_name <- "Rad21_rep1_peaks_peaks.narrowPeak"
+object_rad21_rep1 <- peaksLoading(paste0(input_directory, object_name))
+if (!any(grepl(seqlevels(object_rad21_rep1), pattern = "chr", ignore.case = TRUE))){seqlevels(object_rad21_rep1) <- paste0("chr", seqlevels(object_rad21_rep1))}
+object_name <- "Rad21_rep2_peaks_peaks.narrowPeak"
+object_rad21_rep2 <- peaksLoading(paste0(input_directory, object_name))
+if (!any(grepl(seqlevels(object_rad21_rep2), pattern = "chr", ignore.case = TRUE))){seqlevels(object_rad21_rep2) <- paste0("chr", seqlevels(object_rad21_rep2))}
+object_rad21 <- reduce(c(object_rad21_rep1, object_rad21_rep2))
+
+object_name <- "MED1_rep1_peaks_peaks.narrowPeak"
+object_med1_rep1 <- peaksLoading(paste0(input_directory, object_name))
+if (!any(grepl(seqlevels(object_med1_rep1), pattern = "chr", ignore.case = TRUE))){seqlevels(object_med1_rep1) <- paste0("chr", seqlevels(object_med1_rep1))}
+object_name <- "MED1_rep2_peaks_peaks.narrowPeak"
+object_med1_rep2 <- peaksLoading(paste0(input_directory, object_name))
+if (!any(grepl(seqlevels(object_med1_rep2), pattern = "chr", ignore.case = TRUE))){seqlevels(object_med1_rep2) <- paste0("chr", seqlevels(object_med1_rep2))}
+object_med1 <- reduce(c(object_med1_rep1, object_med1_rep2))
+
+object_name <- "object_nt_peaks.Rds"
+object_ntseq <- readRDS(paste0(input_directory, object_name))
+object_ntseq <- object_ntseq[order(object_ntseq)]
+object_ntseq <- object_ntseq[seqnames(object_ntseq) %in% c("chr2L","chr2R","chr3L","chr3R","chr4","chrX","chrY")]
+
+
+hicexplorer_unique_not_detected <- hicexplorer_unique_with_all
+hicexplorer_unique_not_passed <- hicexplorer_unique_with_weak[-queryHits(findOverlaps(hicexplorer_unique_with_weak, hicexplorer_unique_with_all, type = "any"))]
+
+############################################ Compute distance
+
+gr_from <- c(cortado_start_weak, cortado_end_weak, hicexplorer_weak)
+gr_from <- gr_from[!duplicated(gr_from)]
+
+df_distance <- data.frame(
+        "h3k27me3" = distanceToNearest(gr_from, object_h3k27me3)@elementMetadata$distance,
+        "pc" = distanceToNearest(gr_from, object_pc)@elementMetadata$distance,
+        "dring" = distanceToNearest(gr_from, object_dring)@elementMetadata$distance,
+        "h4" = distanceToNearest(gr_from, object_h4)@elementMetadata$distance,
+        "rad21" = distanceToNearest(gr_from, object_rad21)@elementMetadata$distance,
+        #"ntseq" = distanceToNearest(gr_from, object_ntseq)@elementMetadata$distance,
+        "pol2" = distanceToNearest(gr_from, object_pol2)@elementMetadata$distance,
+        "beaf32" = distanceToNearest(gr_from, object_beaf32)@elementMetadata$distance,
+        "chro" = distanceToNearest(gr_from, object_chro)@elementMetadata$distance,
+        "h3k4me3" = distanceToNearest(gr_from, object_h3k4me3)@elementMetadata$distance,
+        "ctcf" = distanceToNearest(gr_from, object_ctcf)@elementMetadata$distance,
+        "h3" = distanceToNearest(gr_from, object_h3)@elementMetadata$distance,
+        "trl" = distanceToNearest(gr_from, object_trl)@elementMetadata$distance,
+        "h3k27ac" = distanceToNearest(gr_from, object_h3k27ac)@elementMetadata$distance,
+        "h3k9me2" = distanceToNearest(gr_from, object_h3k9me2)@elementMetadata$distance,
+        "h3k9me3" = distanceToNearest(gr_from, object_h3k9me3)@elementMetadata$distance,
+        "cp190" = distanceToNearest(gr_from, object_cp190)@elementMetadata$distance,
+        "med1" = distanceToNearest(gr_from, object_med1)@elementMetadata$distance,
+        "h3k4me1" = distanceToNearest(gr_from, object_h3k4me1)@elementMetadata$distance)
+ntseq <- rep(Inf, times = length(gr_from))
+ntseq[queryHits(distanceToNearest(gr_from, object_ntseq))] <- distanceToNearest(gr_from, object_ntseq)@elementMetadata$distance
+df_distance <- cbind(df_distance[,1:5], ntseq, df_distance[,6:ncol(df_distance)])
+df_distance <- as.matrix(df_distance)
+                
+df_distance <- df_distance[,c(8,17,9,11,5,7,13,18,12,4,10,19,14, 2,3,1,15,16,6)]
+
+df_distance_class <- df_distance
+df_distance_class[df_distance <= max(df_distance)] <- 3
+df_distance_class[df_distance <= 10000] <- 2
+df_distance_class[df_distance <= 5000] <- 1
+df_distance_class[df_distance <= 2000] <- 0
+                        
+row_hclust <- hclust(d = dist(df_distance_class), method = "complete")
+row_clusters <- cutree(row_hclust, k = 3)
+row_order <- row_hclust$order
+
+col_hclust <- hclust(d = dist(t(df_distance_class)), method = "complete")
+col_clusters <- cutree(col_hclust, k = 5)
+col_order <- col_hclust$order
+ 
+df_distance_class_ordered <- df_distance_class[row_order,col_order]
+
+############################################ Plot heat map
+
+palette1 <- c(inferno(n = 7))[c(2,4,5,6)]
+palette2 <- rgb(
+            col2rgb(palette1)[1, ], col2rgb(palette1)[2, ], col2rgb(palette1)[3, ],
+            max = 255, alpha = 255)
+
+plotMat <- function(df, param_col){
+        par(mar = c(6.0, 6.0, 6.0, 6.0))
+        map <- matrix(NA, ncol = ncol(df), nrow = nrow(df))
+        map[df == 0] <- 1#param_col[1]
+        map[df == 1] <- 2#param_col[2]
+        map[df == 2] <- 3#param_col[3]
+        map[df == 3] <- 4#param_col[4]
+        map <- t(map[nrow(map):1,])
+        plot(
+                x = c(1, ncol(map)), y = c(1, nrow(map)), 
+                xlim = c(1, nrow(map)), ylim = c(1, ncol(map)), 
+                xlab = "", ylab = "", axes = FALSE, type = "n", yaxs="i")
+        image(
+                x = c(1:nrow(map)), y = c(1:ncol(map)), z = map, zlim = c(1,4),add = TRUE,
+                xlab = "", ylab = "", axes = FALSE, col = param_col)
+        par(xpd = TRUE)
+        text(x = seq(1, nrow(map)), y = -1.5, labels = colnames(df), cex.axis = 1.8, srt = 45)
+        axis(side = 1, at = seq(1, nrow(map)), lwd = 0, lwd.tick = 1.0, cex.axis = 1.0, labels = NA)}
+        
+pdf(paste0("HiCExplorer_vs_COrTADo_unique_hicexplorer_borders_distance.pdf"), width = 10, height = 20)
+par(xpd = TRUE)
+plotMat(df = df_distance_class_ordered, param_col = palette2)
+dev.off()
+
+############################################ Plot heat map
+
+df_selected <- df_distance_class_ordered[queryHits(findOverlaps(hicexplorer_unique_not_detected, gr_from[row_order], type = "any")),]
+pdf(paste0("HiCExplorer_vs_COrTADo_unique_hicexplorer_borders_distance_unique_non_detected.pdf"), width = 10, height = 10)
+par(xpd = TRUE)
+plotMat(df = df_selected, param_col = palette2)
+dev.off()
+
+df_selected <- df_distance_class_ordered[queryHits(findOverlaps(hicexplorer_unique_not_passed, gr_from[row_order], type = "any")),]
+pdf(paste0("HiCExplorer_vs_COrTADo_unique_hicexplorer_borders_distance_unique_non_passed.pdf"), width = 10, height = 10)
+par(xpd = TRUE)
+plotMat(df = df_selected, param_col = palette2)
+dev.off()
+
+df_selected <- df_distance_class_ordered[queryHits(findOverlaps(hicexplorer_common, gr_from[row_order], type = "any")),]
+pdf(paste0("HiCExplorer_vs_COrTADo_unique_hicexplorer_borders_distance_common.pdf"), width = 10, height = 10)
+par(xpd = TRUE)
+plotMat(df = df_selected, param_col = palette2)
+dev.off()
+
+############################################ Reorder and assign the class (active, silent or Polycomb) 
+
+cortado_start_weak_reordered <- cortado_start_weak[subjectHits(findOverlaps(gr_from[row_order], cortado_start_weak, type = "any"))]
+cortado_end_weak_reordered <- cortado_end_weak[subjectHits(findOverlaps(gr_from[row_order], cortado_end_weak, type = "any"))]
+hicexplorer_weak_reordered <- hicexplorer_weak[subjectHits(findOverlaps(gr_from[row_order], hicexplorer_weak, type = "any"))]
+
+cortado_start_strong_reordered <- cortado_start_strong[subjectHits(findOverlaps(gr_from[row_order], cortado_start_strong, type = "any"))]
+cortado_end_strong_reordered <- cortado_end_strong[subjectHits(findOverlaps(gr_from[row_order], cortado_end_strong, type = "any"))]
+hicexplorer_strong_reordered <- hicexplorer_strong[subjectHits(findOverlaps(gr_from[row_order], hicexplorer_strong, type = "any"))]
+
+cortado_start_weak_reordered$class <- NA
+cortado_start_weak_reordered[subjectHits(findOverlaps(gr_from[row_order], cortado_start_weak_reordered, type = "any"))]$class <- row_clusters[row_order][queryHits(findOverlaps(gr_from[row_order], cortado_start_weak_reordered, type = "any"))]
+
+cortado_end_weak_reordered$class <- NA
+cortado_end_weak_reordered[subjectHits(findOverlaps(gr_from[row_order], cortado_end_weak_reordered, type = "any"))]$class <- row_clusters[row_order][queryHits(findOverlaps(gr_from[row_order], cortado_end_weak_reordered, type = "any"))]
+
+cortado_start_strong_reordered$class <- NA
+cortado_start_strong_reordered[subjectHits(findOverlaps(gr_from[row_order], cortado_start_strong_reordered, type = "any"))]$class <- row_clusters[row_order][queryHits(findOverlaps(gr_from[row_order], cortado_start_strong_reordered, type = "any"))]
+
+cortado_end_strong_reordered$class <- NA
+cortado_end_strong_reordered[subjectHits(findOverlaps(gr_from[row_order], cortado_end_strong_reordered, type = "any"))]$class <- row_clusters[row_order][queryHits(findOverlaps(gr_from[row_order], cortado_end_strong_reordered, type = "any"))]
+
+hicexplorer_weak_reordered$class <- NA
+hicexplorer_weak_reordered[subjectHits(findOverlaps(gr_from[row_order], hicexplorer_weak_reordered, type = "any"))]$class <- row_clusters[row_order][queryHits(findOverlaps(gr_from[row_order], hicexplorer_weak_reordered, type = "any"))]
+
+hicexplorer_strong_reordered$class <- NA
+hicexplorer_strong_reordered[subjectHits(findOverlaps(gr_from[row_order], hicexplorer_strong_reordered, type = "any"))]$class <- row_clusters[row_order][queryHits(findOverlaps(gr_from[row_order], hicexplorer_strong_reordered, type = "any"))]
+
+############################################ 
+####################### DIRECTIONALITY INDEX
+############################################ 
+
+setwd("~/chip/")
+chain <- import.chain("dm3ToDm6.over.chain")
+
+up_left <- 1501
+up_right <- 500
+down_left <- 3001
+down_right <- 500
+
+############################################ Supporting functions (author @DrRaduZabet)
+
+.getPartOfRegion <- function(regions, left, right){
+  start(regions) <- start(regions) + left
+  end(regions) <- start(regions) + right
+  return(regions)}
+
+.FPKMOverlap <- function(largeRegion, smallRegions){
+  return(mean(smallRegions[overlapsAny(smallRegions, largeRegion, ignore.strand=TRUE)]$score, na.rm = TRUE))}
+
+.analyseFPKMOverlapLoop <- function(i, largeRegions, smallRegions){
+  return(.FPKMOverlap(largeRegions[i], smallRegions))}
+  
+############################################ Load GRO-seq (or 3'NT-seq)
+
+GROseq_BG3_pos <- read.table("GSE100545_mock.plus.norm.sgr.gz")
+GROseq_BG3_pos <- GRanges(
+            seqnames = factor(paste0("chr",GROseq_BG3_pos[,1])),
+            ranges = IRanges(start = GROseq_BG3_pos[,2], end = GROseq_BG3_pos[,2]),
+            score = GROseq_BG3_pos[,3])
+GROseq_BG3_pos <- GROseq_BG3_pos[order(GROseq_BG3_pos)]
+GROseq_BG3_pos <-  unlist(liftOver(GROseq_BG3_pos, chain))
+
+GROseq_BG3_neg <- read.table("GSE100545_mock.minus.norm.sgr.gz")
+GROseq_BG3_neg <- GRanges(
+            seqnames = factor(paste0("chr", GROseq_BG3_neg[,1])),
+            ranges = IRanges(start=GROseq_BG3_neg[,2], end = GROseq_BG3_neg[,2]),
+            score = GROseq_BG3_neg[,3])
+GROseq_BG3_neg <- GROseq_BG3_neg[order(GROseq_BG3_neg)]
+GROseq_BG3_neg <-  unlist(liftOver(GROseq_BG3_neg, chain))
+
+############################################ Call
+
+setwd("~/cortado/")
+
+gr_selected <- cortado_start_strong_reordered[cortado_start_strong_reordered$insulation == "2sided"]
+gr_selected_expand <- gr_selected
+start(gr_selected_expand)  <- start(gr_selected_expand)-2500
+end(gr_selected_expand) <- end(gr_selected_expand)+2500
+TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop, 
+	largeRegions = .getPartOfRegion(gr_selected_expand, up_left, up_right), 
+	smallRegions = GROseq_BG3_neg, 
+	mc.cores = 30))
+TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop,
+	largeRegions = .getPartOfRegion(gr_selected_expand, down_left, down_right), 
+	smallRegions = GROseq_BG3_pos, 
+	mc.cores = 30))
+directionality_start_2sided <- log10(
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos + 1)/
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg + 1))
+
+gr_selected <- cortado_start_strong_reordered[cortado_start_strong_reordered$insulation == "imbalance"]
+gr_selected_expand <- gr_selected
+start(gr_selected_expand)  <- start(gr_selected_expand)-2500
+end(gr_selected_expand) <- end(gr_selected_expand)+2500
+TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop, 
+	largeRegions = .getPartOfRegion(gr_selected_expand, up_left, up_right), 
+	smallRegions = GROseq_BG3_neg, 
+	mc.cores = 30))
+TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop,
+	largeRegions = .getPartOfRegion(gr_selected_expand, down_left, down_right), 
+	smallRegions = GROseq_BG3_pos, 
+	mc.cores = 30))
+directionality_start_imbalance <- log10(
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos + 1)/
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg + 1))
+
+gr_selected <- cortado_start_strong_reordered[cortado_start_strong_reordered$insulation == "1sided"]
+gr_selected_expand <- gr_selected
+start(gr_selected_expand)  <- start(gr_selected_expand)-2500
+end(gr_selected_expand) <- end(gr_selected_expand)+2500
+TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop, 
+	largeRegions = .getPartOfRegion(gr_selected_expand, up_left, up_right), 
+	smallRegions = GROseq_BG3_neg, 
+	mc.cores = 30))
+TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop,
+	largeRegions = .getPartOfRegion(gr_selected_expand, down_left, down_right), 
+	smallRegions = GROseq_BG3_pos, 
+	mc.cores = 30))
+directionality_start_1sided <- log10(
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos + 1)/
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg + 1))
+
+gr_selected <- cortado_end_strong_reordered[cortado_end_strong_reordered$insulation == "2sided"]
+gr_selected_expand <- gr_selected
+start(gr_selected_expand)  <- start(gr_selected_expand)-2500
+end(gr_selected_expand) <- end(gr_selected_expand)+2500
+TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop, 
+	largeRegions = .getPartOfRegion(gr_selected_expand, up_left, up_right), 
+	smallRegions = GROseq_BG3_neg, 
+	mc.cores = 30))
+TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop,
+	largeRegions = .getPartOfRegion(gr_selected_expand, down_left, down_right), 
+	smallRegions = GROseq_BG3_pos, 
+	mc.cores = 30))
+directionality_end_2sided <- log10(
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos + 1)/
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg + 1))
+
+gr_selected <- cortado_end_strong_reordered[cortado_end_strong_reordered$insulation == "imbalance"]
+gr_selected_expand <- gr_selected
+start(gr_selected_expand)  <- start(gr_selected_expand)-2500
+end(gr_selected_expand) <- end(gr_selected_expand)+2500
+TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop, 
+	largeRegions = .getPartOfRegion(gr_selected_expand, up_left, up_right), 
+	smallRegions = GROseq_BG3_neg, 
+	mc.cores = 30))
+TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop,
+	largeRegions = .getPartOfRegion(gr_selected_expand, down_left, down_right), 
+	smallRegions = GROseq_BG3_pos, 
+	mc.cores = 30))
+directionality_end_imbalance <- log10(
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos + 1)/
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg + 1))
+
+gr_selected <- cortado_end_strong_reordered[cortado_end_strong_reordered$insulation == "1sided"]
+gr_selected_expand <- gr_selected
+start(gr_selected_expand)  <- start(gr_selected_expand)-2500
+end(gr_selected_expand) <- end(gr_selected_expand)+2500
+TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop, 
+	largeRegions = .getPartOfRegion(gr_selected_expand, up_left, up_right), 
+	smallRegions = GROseq_BG3_neg, 
+	mc.cores = 30))
+TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos <- unlist(parallel::mclapply(
+	1:length(gr_selected_expand), 
+	.analyseFPKMOverlapLoop,
+	largeRegions = .getPartOfRegion(gr_selected_expand, down_left, down_right), 
+	smallRegions = GROseq_BG3_pos, 
+	mc.cores = 30))
+directionality_end_1sided <- log10(
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_downstream_GROseqBG3pos + 1)/
+	(500*TADs_BG3_all_borders_stay_strong_1Kb_upstream_GROseqBG3neg + 1))
